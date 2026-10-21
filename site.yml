@@ -1,0 +1,20 @@
+---
+- name: AtlasOps - sichere Basisprüfung für Linux-Lab-Server
+  hosts: linux_servers
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Zeige Betriebssysteminformationen
+      ansible.builtin.debug:
+        msg: "Verwaltet wird {{ inventory_hostname }} mit {{ ansible_distribution }} {{ ansible_distribution_version }}"
+
+    - name: Lege einen Administrations-Hinweis an
+      ansible.builtin.copy:
+        dest: /etc/atlasops-managed
+        content: |
+          Dieser Server wird im AtlasOps-Lernlabor verwaltet.
+          Konfigurationsänderungen bitte dokumentieren.
+        owner: root
+        group: root
+        mode: "0644"

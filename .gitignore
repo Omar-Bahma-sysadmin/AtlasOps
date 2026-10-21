@@ -1,0 +1,11 @@
+reports/*.json
+*.tar.gz
+*.sha256
+.env
+*.pem
+*.key
+id_rsa
+id_ed25519
+__pycache__/
+*.py[cod]
+.venv/
