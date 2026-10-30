@@ -22,7 +22,7 @@
 ---
 
 <p align="center">
-  <img src="assets/banner.png" alt="AtlasOps Banner" width="100%">
+ <img src="assets/banner.png.jpg" alt="AtlasOps Banner" width="100%">
 </p>
 
 ---
