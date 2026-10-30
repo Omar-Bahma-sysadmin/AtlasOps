@@ -37,7 +37,7 @@ if command -v free >/dev/null 2>&1; then
     MEMORY_VALUE="$(
         free -b 2>/dev/null |
         awk '$1 == "Mem:" {
-            printf "{\\"total_bytes\\":%s,\\"used_bytes\\":%s,\\"available_bytes\\":%s}", $2, $3, $7
+            printf "{\"total_bytes\":%s,\"used_bytes\":%s,\"available_bytes\":%s}", $2, $3, $7
         }'
     )"
     [[ -n "$MEMORY_VALUE" ]] || MEMORY_VALUE='{}'
@@ -46,7 +46,7 @@ fi
 DISK_VALUE="$(
     df -P -B1 / 2>/dev/null |
     awk 'NR == 2 {
-        printf "{\\"mount\\":\\"%s\\",\\"total_bytes\\":%s,\\"used_bytes\\":%s,\\"available_bytes\\":%s,\\"use_percent\\":\\"%s\\"}", $6, $2, $3, $4, $5
+        printf "{\"mount\":\"%s\",\"total_bytes\":%s,\"used_bytes\":%s,\"available_bytes\":%s,\"use_percent\":\"%s\"}", $6, $2, $3, $4, $5
     }'
 )"
 [[ -n "$DISK_VALUE" ]] || DISK_VALUE='{}'
