@@ -1,33 +1,53 @@
 # Testplan
 
-Führe alle Tests in einer eigenen Linux-VM oder einer Umgebung aus, die du administrieren darfst.
+## Testumgebung und Nachweis
 
-## Health Check
-- [ ] `./scripts/health_check.sh` endet ohne Fehler.
-- [ ] `reports/latest.json` wird erstellt und ist gültiges JSON.
-- [ ] Prüfe die JSON-Datei mit `python3 -m json.tool reports/latest.json`.
-- [ ] `python3 report.py --input reports/latest.json` zeigt einen Bericht.
-- [ ] Teste `ATLASOPS_SERVICE=does-not-exist ./scripts/health_check.sh`.
-- [ ] Dokumentiere, ob systemd verfügbar war und welchen Dienststatus das Skript meldet.
+Die automatisierten Integrationstests wurden am **30.10.2026** auf einem GitHub-gehosteten Runner mit **Ubuntu 24.04.5 LTS** ausgeführt.
+
+- Workflow-Lauf: [AtlasOps Integration Tests – erfolgreicher Lauf](https://github.com/Omar-Bahma-sysadmin/AtlasOps/actions/runs/41091067906)
+- Ergebnis: Alle zehn Workflow-Schritte erfolgreich abgeschlossen.
+- Artefakt: [atlasops-test-evidence](https://github.com/Omar-Bahma-sysadmin/AtlasOps/actions/runs/41091067906/artifacts/12992903857) (enthält den JSON-Testbericht).
+- Die vollständigen Konsolenprotokolle sind im Workflow-Lauf einsehbar.
+
+Die folgenden CI-Prüfungen sind als erfolgreich dokumentiert. Manuelle Tests in einer eigenen VM sind davon getrennt zu betrachten.
+
+## Linux und systemd
+
+- [x] Linux-Umgebung erkannt (Ubuntu 24.04.5 LTS).
+- [x] systemd-Laufzeitumgebung erkannt.
+- [x] OpenSSH-Server im CI-Runner installiert und gestartet.
+- [x] Vorhandener Dienst `ssh` als aktiv erkannt.
+- [x] Nicht vorhandener Dienst als `not_found` erkannt.
+
+## Health Check und Report Renderer
+
+- [x] Health-Check-Skript im CI-Test ausgeführt.
+- [x] Bericht als JSON erzeugt.
+- [x] Gültige JSON-Daten mit dem Python-Renderer verarbeitet.
+- [x] Fehlerhaftes JSON zurückgewiesen.
+- [x] JSON mit falscher Datenstruktur zurückgewiesen.
 
 ## Backup
-- [ ] Lege eigene Testdaten in einem temporären Quellverzeichnis an.
-- [ ] Erstelle ein Backup mit `./backup.sh QUELLVERZEICHNIS BACKUP_VERZEICHNIS`.
-- [ ] Prüfe die Prüfsumme mit `sha256sum -c DATEI.tar.gz.sha256`.
-- [ ] Liste den Archivinhalt mit `tar -tzf DATEI.tar.gz`.
-- [ ] Übe eine Wiederherstellung in ein anderes Testverzeichnis.
-- [ ] Prüfe, dass ein Backup-Ziel innerhalb des Quellverzeichnisses abgelehnt wird.
 
-## Report Renderer
-- [ ] Teste das Skript mit einer gültigen JSON-Datei.
-- [ ] Teste einen nicht vorhandenen Dateipfad.
-- [ ] Teste eine ungültige JSON-Datei.
-- [ ] Prüfe die Ausgabe bei fehlenden RAM- oder Festplattenwerten.
+- [x] Backup-Archiv erstellt.
+- [x] SHA-256-Prüfsummendatei erstellt.
+- [x] Prüfsumme erfolgreich verifiziert (`sha256sum -c`).
+- [x] Archiv in ein separates Verzeichnis wiederhergestellt.
+- [x] Wiederhergestellte Dateien mit den Quelldateien verglichen (`cmp`).
+- [x] Fehlendes Quellverzeichnis korrekt zurückgewiesen.
+- [x] Backup-Ziel innerhalb des Quellverzeichnisses korrekt zurückgewiesen.
+- [x] Ungültiges Backup-Ziel korrekt zurückgewiesen.
+- [x] Simulierten Fehler beim Erstellen des Archivs erkannt.
+- [x] Bei fehlgeschlagener Archiverstellung wurde keine Prüfsummendatei erzeugt.
 
-## Portfolio
-- [ ] Füge Datum, Betriebssystem und Testergebnis hinzu.
-- [ ] Ergänze Screenshots ohne private IPs, Benutzernamen oder sensible Daten.
-- [ ] Beschreibe mindestens einen Fehler, seine Ursache und die Lösung.
+## Noch ausstehende manuelle Prüfungen
+
+- [ ] Health Check manuell in einer eigenen Ubuntu-Server-VM ausführen.
+- [ ] JSON-Bericht und Report-Ausgabe in dieser VM kontrollieren.
+- [ ] Backup und Wiederherstellung in dieser VM zusätzlich durchführen.
+- [ ] Verhalten auf einer weiteren Linux-Distribution prüfen.
+- [ ] Screenshots aus einer tatsächlichen Testausführung ergänzen (ohne sensible Daten).
 
 ## Geplante Erweiterungen
+
 - [ ] Ansible-Playbook entwickeln und in einer isolierten Lab-VM testen.
