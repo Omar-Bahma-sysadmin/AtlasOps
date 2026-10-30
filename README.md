@@ -32,7 +32,7 @@ AtlasOps ist ein praxisorientiertes Portfolio-Projekt im Bereich Linux-Systemadm
 
 Das Projekt simuliert typische administrative Aufgaben in einem kleinen Unternehmen mit Linux-Systemen. Ziel ist es, wiederkehrende Aufgaben durch Bash-Skripte zu vereinfachen, Systeminformationen strukturiert zu erfassen und Backups mit SHA-256-Prüfsummen zu erstellen.
 
-**Projektstatus:** Lern- und Lab-Projekt. Die Skripte müssen in einer geeigneten Linux-Testumgebung geprüft werden, bevor sie für produktive Systeme verwendet werden.
+**Projektstatus:** Lern- und Lab-Projekt. Automatisierte Integrationstests laufen erfolgreich in GitHub Actions auf Ubuntu 24.04. Zusätzliche manuelle Tests und eine Prüfung vor einem produktiven Einsatz bleiben erforderlich.
 
 ## Funktionen
 
