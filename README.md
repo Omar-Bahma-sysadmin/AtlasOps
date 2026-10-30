@@ -191,19 +191,27 @@ Die folgenden Bilder sind **illustrative Darstellungen des vorgesehenen Workflow
 
 ## Tests und Qualitätssicherung
 
-Ein separater Testplan befindet sich in [`TESTPLAN.md`](TESTPLAN.md).
+Die automatisierten Integrationstests laufen über **GitHub Actions**. Der erfolgreiche Lauf vom **30.10.2026** wurde auf einem GitHub-gehosteten Runner mit **Ubuntu 24.04.5 LTS** ausgeführt.
 
-Geplante beziehungsweise noch zu dokumentierende Prüfungen umfassen:
+**Ergebnis:** Alle zehn Workflow-Schritte wurden erfolgreich abgeschlossen.
 
-- Ausführung des Health-Check-Skripts
-- Überprüfung der erzeugten JSON-Datei
-- Darstellung des Berichts mit Python
-- Erstellung und Integritätsprüfung von Backups
-- Kontrolle des Archivinhalts
-- Testweise Wiederherstellung in einem separaten Verzeichnis
-- Dokumentation von Fehlern, Ursachen und Lösungen
+Getestet wurden:
+- Linux-Umgebung und Verfügbarkeit von systemd
+- Installation und Start des OpenSSH-Dienstes
+- Erkennung eines aktiven Dienstes sowie eines nicht vorhandenen Dienstes
+- Verarbeitung gültiger JSON-Daten mit dem Python-Report-Renderer
+- Zurückweisung von fehlerhaftem JSON und JSON-Daten mit falscher Struktur
+- Erstellung eines Backup-Archivs und SHA-256-Prüfsumme
+- Prüfung der Prüfsumme und Wiederherstellung mit anschließendem Dateivergleich
+- Fehlerfälle: fehlende Quelle, verschachteltes Backup-Ziel, ungültiges Ziel und simulierter tar-Fehler
 
-Testergebnisse werden erst nach der tatsächlichen Ausführung in einer geeigneten Testumgebung als abgeschlossen dokumentiert.
+**Nachweise:**
+- [Erfolgreicher GitHub-Actions-Lauf](https://github.com/Omar-Bahma-sysadmin/AtlasOps/actions/runs/41091067906)
+- [Workflow-Artefakt: atlasops-test-evidence](https://github.com/Omar-Bahma-sysadmin/AtlasOps/actions/runs/41091067906/artifacts/12992903857)
+
+Der Workflow-Artefakt enthält den erzeugten JSON-Testbericht. Die vollständigen Schritt- und Konsolenprotokolle sind im GitHub-Actions-Lauf einsehbar.
+
+**Abgrenzung:** Diese Ergebnisse belegen die automatisierten Tests in der genannten Ubuntu-CI-Umgebung. Sie sind kein Nachweis für einen produktiven Einsatz oder für Tests auf allen Linux-Distributionen. Manuelle Tests in einer eigenen Ubuntu-Server-VM bleiben eine separate Prüfung.
 
 ## Roadmap
 
