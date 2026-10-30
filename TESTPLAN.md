@@ -38,7 +38,10 @@ Die folgenden CI-Prüfungen sind als erfolgreich dokumentiert. Manuelle Tests in
 - [x] Backup-Ziel innerhalb des Quellverzeichnisses korrekt zurückgewiesen.
 - [x] Ungültiges Backup-Ziel korrekt zurückgewiesen.
 - [x] Simulierten Fehler beim Erstellen des Archivs erkannt.
-- [x] Bei fehlgeschlagener Archiverstellung wurde keine Prüfsummendatei erzeugt.
+- [x] Bei fehlgeschlagener Archiverstellung bleiben weder Archiv noch Prüfsummen- oder temporäre Dateien zurück.
+- [x] Bei fehlgeschlagener Prüfsummenerstellung werden keine unvollständigen Backup-Dateien veröffentlicht.
+- [x] Temporäre Dateien werden nach Fehlern entfernt.
+- [x] Bereits vorhandene Zieldateien werden beim Veröffentlichen nicht überschrieben.
 
 ## Noch ausstehende manuelle Prüfungen
 
