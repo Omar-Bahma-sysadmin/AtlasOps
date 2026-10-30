@@ -143,6 +143,48 @@ jobs:
           fi
           echo "PASS: checksum failure leaves no partial backup files"
 
+          # Simulate another process creating the archive target immediately before publication.
+          mkdir -p "$WORK/race-archive-bin" "$WORK/race-archive-backups"
+          cat > "$WORK/race-archive-bin/ln" <<'SH'
+          #!/usr/bin/env bash
+          printf 'created by competing process\\n' > "$3"
+          exec /usr/bin/ln "$@"
+          SH
+          chmod +x "$WORK/race-archive-bin/ln"
+          if PATH="$WORK/race-archive-bin:$PATH" bash backup.sh "$WORK/source" "$WORK/race-archive-backups"; then
+            echo "Expected archive publication collision to fail" >&2
+            exit 1
+          fi
+          COMPETING_ARCHIVE="$(find "$WORK/race-archive-backups" -maxdepth 1 -name '*.tar.gz' -print -quit)"
+          test -n "$COMPETING_ARCHIVE"
+          grep -q 'created by competing process' "$COMPETING_ARCHIVE"
+          test "$(find "$WORK/race-archive-backups" -maxdepth 1 -type f | wc -l)" -eq 1
+          echo "PASS: archive collision preserves the competing process file"
+
+          # Simulate a competing checksum file after this process publishes its archive.
+          mkdir -p "$WORK/race-checksum-bin" "$WORK/race-checksum-backups"
+          cat > "$WORK/race-checksum-bin/ln" <<'SH'
+          #!/usr/bin/env bash
+          case "$3" in
+            *.sha256) printf 'created by competing process\\n' > "$3" ;;
+          esac
+          exec /usr/bin/ln "$@"
+          SH
+          chmod +x "$WORK/race-checksum-bin/ln"
+          if PATH="$WORK/race-checksum-bin:$PATH" bash backup.sh "$WORK/source" "$WORK/race-checksum-backups"; then
+            echo "Expected checksum publication collision to fail" >&2
+            exit 1
+          fi
+          COMPETING_CHECKSUM="$(find "$WORK/race-checksum-backups" -maxdepth 1 -name '*.sha256' -print -quit)"
+          test -n "$COMPETING_CHECKSUM"
+          grep -q 'created by competing process' "$COMPETING_CHECKSUM"
+          if find "$WORK/race-checksum-backups" -maxdepth 1 -name '*.tar.gz' | grep -q .; then
+            echo "Our archive should be rolled back after checksum publication fails" >&2
+            exit 1
+          fi
+          test "$(find "$WORK/race-checksum-backups" -maxdepth 1 -type f | wc -l)" -eq 1
+          echo "PASS: checksum collision preserves competing file and rolls back own archive"
+
       - name: Publish test evidence
         if: always()
         run: |
