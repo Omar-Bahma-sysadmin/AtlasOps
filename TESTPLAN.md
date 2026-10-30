@@ -41,7 +41,9 @@ Die folgenden CI-Prüfungen sind als erfolgreich dokumentiert. Manuelle Tests in
 - [x] Bei fehlgeschlagener Archiverstellung bleiben weder Archiv noch Prüfsummen- oder temporäre Dateien zurück.
 - [x] Bei fehlgeschlagener Prüfsummenerstellung werden keine unvollständigen Backup-Dateien veröffentlicht.
 - [x] Temporäre Dateien werden nach Fehlern entfernt.
-- [x] Bereits vorhandene Zieldateien werden beim Veröffentlichen nicht überschrieben.
+- [x] Bereits vorhandene Zieldateien werden beim atomaren Veröffentlichen nicht überschrieben.
+- [x] Simulierter Konflikt beim Veröffentlichen des Archivs: fremde Zieldatei bleibt erhalten.
+- [x] Simulierter Konflikt beim Veröffentlichen der Prüfsumme: fremde Zieldatei bleibt erhalten und das eigene Archiv wird zurückgerollt.
 
 ## Noch ausstehende manuelle Prüfungen
 
