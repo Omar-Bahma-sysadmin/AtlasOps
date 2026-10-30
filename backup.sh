@@ -9,7 +9,7 @@ if [[ $# -ne 2 ]]; then
   exit 2
 fi
 
-for cmd in realpath tar sha256sum date hostname tr; do
+for cmd in realpath tar sha256sum date hostname tr mktemp mv; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
     echo "Fehler: $cmd ist erforderlich." >&2
     exit 1
@@ -51,8 +51,36 @@ if [[ -e "$ARCHIVE" || -e "$CHECKSUM" ]]; then
   exit 1
 fi
 
-tar -czf "$ARCHIVE" -C "$(dirname "$SOURCE_DIR")" "$(basename "$SOURCE_DIR")"
-sha256sum "$ARCHIVE" > "$CHECKSUM"
+ARCHIVE_TMP=""
+CHECKSUM_TMP=""
+cleanup() {
+  local status=$?
+  if [[ -n "$ARCHIVE_TMP" ]]; then
+    rm -f -- "$ARCHIVE_TMP"
+  fi
+  if [[ -n "$CHECKSUM_TMP" ]]; then
+    rm -f -- "$CHECKSUM_TMP"
+  fi
+  # If either publication step fails, do not leave a partial final backup.
+  if [[ $status -ne 0 ]]; then
+    rm -f -- "$ARCHIVE" "$CHECKSUM"
+  fi
+  return "$status"
+}
+trap cleanup EXIT
+
+ARCHIVE_TMP="$(mktemp "$BACKUP_DIR/.atlasops-archive.XXXXXX")"
+CHECKSUM_TMP="$(mktemp "$BACKUP_DIR/.atlasops-checksum.XXXXXX")"
+
+# Build and hash temporary files first. Publish only after both succeed.
+tar -czf "$ARCHIVE_TMP" -C "$(dirname "$SOURCE_DIR")" "$(basename "$SOURCE_DIR")"
+ARCHIVE_HASH="$(sha256sum "$ARCHIVE_TMP" | awk '{print $1}')"
+printf '%s  %s\n' "$ARCHIVE_HASH" "$(basename "$ARCHIVE")" > "$CHECKSUM_TMP"
+
+mv -- "$ARCHIVE_TMP" "$ARCHIVE"
+ARCHIVE_TMP=""
+mv -- "$CHECKSUM_TMP" "$CHECKSUM"
+CHECKSUM_TMP=""
 
 echo "Backup erstellt: $ARCHIVE"
 echo "Prüfsumme gespeichert: $CHECKSUM"
