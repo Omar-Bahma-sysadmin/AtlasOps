@@ -77,9 +77,19 @@ tar -czf "$ARCHIVE_TMP" -C "$(dirname "$SOURCE_DIR")" "$(basename "$SOURCE_DIR")
 ARCHIVE_HASH="$(sha256sum "$ARCHIVE_TMP" | awk '{print $1}')"
 printf '%s  %s\n' "$ARCHIVE_HASH" "$ARCHIVE" > "$CHECKSUM_TMP"
 
-mv -- "$ARCHIVE_TMP" "$ARCHIVE"
+# Do not overwrite a file created by another process after the initial collision check.
+mv -n -- "$ARCHIVE_TMP" "$ARCHIVE"
+if [[ -e "$ARCHIVE_TMP" ]]; then
+  echo "Fehler: Backup-Zieldatei wurde zwischenzeitlich angelegt." >&2
+  exit 1
+fi
 ARCHIVE_TMP=""
-mv -- "$CHECKSUM_TMP" "$CHECKSUM"
+
+mv -n -- "$CHECKSUM_TMP" "$CHECKSUM"
+if [[ -e "$CHECKSUM_TMP" ]]; then
+  echo "Fehler: Prüfsummendatei wurde zwischenzeitlich angelegt." >&2
+  exit 1
+fi
 CHECKSUM_TMP=""
 
 echo "Backup erstellt: $ARCHIVE"
