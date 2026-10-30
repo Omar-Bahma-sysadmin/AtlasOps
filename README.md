@@ -19,7 +19,7 @@ Linux, Bash, Python 3, Ansible, Git, Markdown
 ```bash
 chmod +x scripts/*.sh
 ./scripts/health_check.sh
-python3 scripts/report.py --input reports/latest.json
+python3 report.py --input reports/latest.json
 ```
 
 Backup-Test mit selbst erstellten Testdaten:
