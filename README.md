@@ -1,48 +1,98 @@
-# AtlasOps – Smart Server Care & Automation
+AtlasOps – Smart Server Care & Automation
 
-**Ein praxisnahes Portfolio-Projekt für Fachinformatiker/in für Systemintegration (FISI).**
+Ein praxisnahes Portfolio-Projekt für Fachinformatiker/in für Systemintegration (FISI).
 
-AtlasOps ist ein selbst entwickeltes Administrations-Toolkit für eine fiktive kleine Firma mit Linux-Servern. Es hilft, wiederkehrende Admin-Aufgaben nachvollziehbar, sicher und reproduzierbar auszuführen.
+AtlasOps ist ein Administrations-Toolkit für eine fiktive kleine Firma mit Linux-Servern. Es unterstützt typische Aufgaben der Systemadministration und macht wiederkehrende Tätigkeiten nachvollziehbar und reproduzierbar.
 
-> Status: Lern-/Lab-Projekt. Nicht ungeprüft auf Produktivsystemen einsetzen.
+Projektstatus: Lern- und Lab-Projekt. Die Skripte wurden noch nicht vollständig in einer Linux-Testumgebung geprüft. Nicht ungeprüft auf Produktivsystemen einsetzen.
 
-## Funktionen
-- Systemzustand prüfen und JSON-Bericht erzeugen
-- ausgewählte Daten sichern und SHA-256-Prüfsumme erstellen
-- Bericht lesbar in der Konsole anzeigen
-- wiederholbare Serverkonfiguration mit Ansible vorbereiten
+Funktionen
 
-## Technologien
+Linux-Systeminformationen sammeln und einen JSON-Bericht erstellen
+
+Systemberichte lesbar in der Konsole anzeigen
+
+Verzeichnisse als komprimierte Backups sichern
+
+SHA-256-Prüfsummen für Backup-Dateien erstellen
+
+Grundlagen der Serveradministration und Automatisierung demonstrieren
+
+Technologien
+
 Linux, Bash, Python 3, Ansible, Git, Markdown
 
-## Schnellstart
-```bash
-chmod +x scripts/*.sh
-./scripts/health_check.sh
-python3 report.py --input reports/latest.json
-```
+Projektstruktur
 
-Backup-Test mit selbst erstellten Testdaten:
-```bash
+AtlasOps/
+├── scripts/
+│   ├── health_check.sh
+│   └── backup.sh
+├── report.py
+├── reports/
+└── README.md
+
+Schnellstart
+
+1. Skripte ausführbar machen
+
+chmod +x scripts/*.sh
+
+2. System-Health-Check ausführen
+
+./scripts/health_check.sh
+
+Der Bericht wird unter reports/latest.json gespeichert.
+
+3. JSON-Bericht anzeigen
+
+python3 report.py --input reports/latest.json
+
+Backup testen
+
+Mit selbst erstellten Testdaten:
+
 mkdir -p /tmp/atlasops-demo/source
 echo "Testdaten" > /tmp/atlasops-demo/source/demo.txt
+
+Backup erstellen:
+
 ./scripts/backup.sh /tmp/atlasops-demo/source /tmp/atlasops-demo/backups
-```
 
-## Sicherheit
-- Keine Passwörter, Tokens, privaten Schlüssel oder echten Kundendaten committen.
-- Erst in einer VM oder Testumgebung testen.
-- Ansible zuerst mit `--check --diff` prüfen.
-- Restore, Berechtigungen und Aufbewahrungsfristen vor produktiver Nutzung testen.
+Das Skript erstellt eine komprimierte Backup-Datei und eine SHA-256-Prüfsummendatei.
 
-## Roadmap
-- [x] Projektstruktur und erste Health-Check-Version
-- [x] Backup-Skript mit Prüfsumme
-- [x] JSON-Report-Renderer
-- [ ] Tests in Ubuntu Server VM dokumentieren
-- [ ] Ansible-Playbook in einer isolierten VM testen
-- [ ] Screenshots und Testergebnisse ergänzen
-- [ ] Deutsche Projektpräsentation für Bewerbungen vorbereiten
+Sicherheit
 
-## Warum dieses Projekt?
-Es zeigt typische FISI-Aufgaben: Systeme prüfen, Daten sichern, Linux verwalten und wiederkehrende Tätigkeiten automatisieren. Belege deine Ergebnisse mit Tests, Screenshots und einer kurzen Fehleranalyse.
+Keine Passwörter, Tokens, privaten Schlüssel oder echten Kundendaten committen.
+
+Skripte zuerst in einer VM oder isolierten Testumgebung prüfen.
+
+Ansible-Änderungen zunächst mit --check --diff testen.
+
+Backup-Wiederherstellung, Berechtigungen und Aufbewahrungsfristen vor einem produktiven Einsatz prüfen.
+
+Roadmap
+
+Projektstruktur und erste Skriptversionen erstellen
+
+Health-Check-Skript implementieren
+
+Backup-Skript mit SHA-256-Prüfsumme implementieren
+
+JSON-Report-Renderer implementieren
+
+Skripte in einer Ubuntu-Server-VM testen
+
+Backup-Wiederherstellung und Prüfsummenprüfung testen
+
+Ansible-Playbook erstellen und in einer isolierten VM testen
+
+Screenshots und Testergebnisse dokumentieren
+
+Deutsche Projektpräsentation für Bewerbungen vorbereiten
+
+Warum dieses Projekt?
+
+AtlasOps demonstriert grundlegende Aufgaben der Fachinformatik für Systemintegration: Linux-Systeme überwachen, Daten sichern, Systeminformationen auswerten und wiederkehrende administrative Aufgaben automatisieren.
+
+Die Projektergebnisse sollen durch Tests, Screenshots und eine kurze Fehleranalyse dokumentiert werden.
