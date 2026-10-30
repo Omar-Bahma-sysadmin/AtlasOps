@@ -22,15 +22,24 @@ if [[ ! -d "$1" ]]; then
 fi
 
 SOURCE_DIR="$(realpath "$1")"
-mkdir -p "$2"
-BACKUP_DIR="$(realpath "$2")"
+BACKUP_DIR="$(realpath -m "$2")"
+
+# Normalize the source prefix; this also handles SOURCE_DIR="/".
+SOURCE_PREFIX="$SOURCE_DIR"
+if [[ "$SOURCE_PREFIX" != "/" ]]; then
+  SOURCE_PREFIX+="/"
+fi
 
 case "$BACKUP_DIR/" in
-  "$SOURCE_DIR/"*)
+  "$SOURCE_PREFIX"*)
     echo "Fehler: Backup-Ziel liegt innerhalb des Quellverzeichnisses." >&2
     exit 1
     ;;
 esac
+
+# Create the destination only after validating that it is outside the source.
+mkdir -p "$BACKUP_DIR"
+BACKUP_DIR="$(realpath "$BACKUP_DIR")"
 
 TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 HOST="$(hostname | tr -cd '[:alnum:]._-' )"
