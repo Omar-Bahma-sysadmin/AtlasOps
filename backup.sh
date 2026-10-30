@@ -75,7 +75,7 @@ CHECKSUM_TMP="$(mktemp "$BACKUP_DIR/.atlasops-checksum.XXXXXX")"
 # Build and hash temporary files first. Publish only after both succeed.
 tar -czf "$ARCHIVE_TMP" -C "$(dirname "$SOURCE_DIR")" "$(basename "$SOURCE_DIR")"
 ARCHIVE_HASH="$(sha256sum "$ARCHIVE_TMP" | awk '{print $1}')"
-printf '%s  %s\n' "$ARCHIVE_HASH" "$(basename "$ARCHIVE")" > "$CHECKSUM_TMP"
+printf '%s  %s\n' "$ARCHIVE_HASH" "$ARCHIVE" > "$CHECKSUM_TMP"
 
 mv -- "$ARCHIVE_TMP" "$ARCHIVE"
 ARCHIVE_TMP=""
