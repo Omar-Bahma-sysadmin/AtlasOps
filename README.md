@@ -212,9 +212,10 @@ Testergebnisse werden erst nach der tatsächlichen Ausführung in einer geeignet
 - [x] Backup-Skript mit SHA-256-Prüfsumme entwickeln
 - [x] Python-Skript zur Darstellung des JSON-Berichts entwickeln
 - [x] Projektdokumentation und illustrative Screenshots hinzufügen
-- [ ] Skripte in einer Ubuntu-Server-VM testen
-- [ ] Backup-Integrität und Wiederherstellung praktisch prüfen
-- [ ] Testergebnisse dokumentieren
+- [x] Automatisierte Integrationstests in GitHub Actions erfolgreich ausführen
+- [x] Backup-Integrität und Wiederherstellung im CI-Test prüfen
+- [x] CI-Testergebnisse dokumentieren
+- [ ] Skripte zusätzlich manuell in einer eigenen Ubuntu-Server-VM testen
 - [ ] Ansible-Playbook als zukünftige Erweiterung entwickeln und testen
 - [ ] Deutsche Projektpräsentation für Bewerbungen vorbereiten
 
