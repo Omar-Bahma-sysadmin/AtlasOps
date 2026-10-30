@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
@@ -11,7 +10,6 @@ REPORT_FILE="$REPORT_DIR/latest.json"
 
 mkdir -p "$REPORT_DIR"
 
-# Check required commands
 for cmd in python3 hostname awk df; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
         echo "Fehler: $cmd ist erforderlich." >&2
@@ -19,10 +17,8 @@ for cmd in python3 hostname awk df; do
     fi
 done
 
-# System information
 HOSTNAME_VALUE="$(hostname)"
 OS_VALUE="unknown"
-
 if [[ -r /etc/os-release ]]; then
     OS_VALUE="$(
         . /etc/os-release
@@ -31,47 +27,33 @@ if [[ -r /etc/os-release ]]; then
 fi
 
 UPTIME_VALUE="$(uptime -p 2>/dev/null || uptime 2>/dev/null || echo unknown)"
-
 LOAD_VALUE="unknown"
 if [[ -r /proc/loadavg ]]; then
     LOAD_VALUE="$(awk '{print $1" "$2" "$3}' /proc/loadavg)"
 fi
 
-# Memory information
-MEMORY_VALUE="{}"
-
+MEMORY_VALUE='{}'
 if command -v free >/dev/null 2>&1; then
     MEMORY_VALUE="$(
         free -b 2>/dev/null |
         awk '$1 == "Mem:" {
-            printf "{\"total_bytes\":%s,\"used_bytes\":%s,\"available_bytes\":%s}",
-            $2, $3, $7
+            printf "{\\"total_bytes\\":%s,\\"used_bytes\\":%s,\\"available_bytes\\":%s}", $2, $3, $7
         }'
     )"
-    MEMORY_VALUE="${MEMORY_VALUE:-\{\}}"
+    [[ -n "$MEMORY_VALUE" ]] || MEMORY_VALUE='{}'
 fi
 
-# Root filesystem information
 DISK_VALUE="$(
     df -P -B1 / 2>/dev/null |
     awk 'NR == 2 {
-        printf "{\"mount\":\"%s\",\"total_bytes\":%s,\"used_bytes\":%s,\"available_bytes\":%s,\"use_percent\":\"%s\"}",
-        $6, $2, $3, $4, $5
+        printf "{\\"mount\\":\\"%s\\",\\"total_bytes\\":%s,\\"used_bytes\\":%s,\\"available_bytes\\":%s,\\"use_percent\\":\\"%s\\"}", $6, $2, $3, $4, $5
     }'
 )"
-DISK_VALUE="${DISK_VALUE:-\{\}}"
+[[ -n "$DISK_VALUE" ]] || DISK_VALUE='{}'
 
-# Service check
 SERVICE_NAME="${ATLASOPS_SERVICE:-ssh}"
-
-if command -v systemctl >/dev/null 2>&1 \
-   && [[ -d /run/systemd/system ]]; then
-
-    LOAD_STATE="$(
-        systemctl show "$SERVICE_NAME" \
-            --property=LoadState --value 2>/dev/null || echo unknown
-    )"
-
+if command -v systemctl >/dev/null 2>&1 && [[ -d /run/systemd/system ]]; then
+    LOAD_STATE="$(systemctl show "$SERVICE_NAME" --property=LoadState --value 2>/dev/null || echo unknown)"
     if [[ "$LOAD_STATE" == "not-found" ]]; then
         SERVICE_STATUS="not_found"
     elif [[ "$LOAD_STATE" == "loaded" ]]; then
@@ -90,7 +72,6 @@ fi
 export HOSTNAME_VALUE OS_VALUE UPTIME_VALUE LOAD_VALUE
 export MEMORY_VALUE DISK_VALUE SERVICE_NAME SERVICE_STATUS
 
-# Generate JSON report
 python3 - "$REPORT_FILE" <<'PY'
 import json
 import os
@@ -98,9 +79,10 @@ import sys
 from datetime import datetime, timezone
 
 
-def parse_json(name):
+def parse_object(name):
     try:
-        return json.loads(os.environ.get(name, "{}"))
+        value = json.loads(os.environ.get(name, "{}"))
+        return value if isinstance(value, dict) else {}
     except (json.JSONDecodeError, TypeError):
         return {}
 
@@ -111,12 +93,12 @@ report = {
     "operating_system": os.environ.get("OS_VALUE", "unknown"),
     "uptime": os.environ.get("UPTIME_VALUE", "unknown"),
     "load_average_1_5_15": os.environ.get("LOAD_VALUE", "unknown"),
-    "memory": parse_json("MEMORY_VALUE"),
-    "root_filesystem": parse_json("DISK_VALUE"),
+    "memory": parse_object("MEMORY_VALUE"),
+    "root_filesystem": parse_object("DISK_VALUE"),
     "service_check": {
         "service": os.environ.get("SERVICE_NAME", "ssh"),
-        "status": os.environ.get("SERVICE_STATUS", "unknown")
-    }
+        "status": os.environ.get("SERVICE_STATUS", "unknown"),
+    },
 }
 
 with open(sys.argv[1], "w", encoding="utf-8") as file:
