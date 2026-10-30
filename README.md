@@ -137,7 +137,19 @@ Das Skript erstellt eine komprimierte Backup-Datei und eine SHA-256-Prüfsummend
 
 ## Screenshots
 
-Screenshots aus einer realen Linux-Testumgebung werden nach Durchführung der Tests hier ergänzt.
+Illustrative screenshots of the AtlasOps workflow.
+
+### 1. System Health Check
+![AtlasOps Health Check](assets/screenshots/01-health-check.png)
+
+### 2. JSON System Report
+![AtlasOps JSON Report](assets/screenshots/02-json-report.png)
+
+### 3. Backup and Restore
+![AtlasOps Backup and Restore](assets/screenshots/03-backup-restore.png)
+
+### 4. SHA-256 Checksum Verification
+![AtlasOps Checksum Verification](assets/screenshots/04-checksum-verification.png)
 
 ## Roadmap
 
