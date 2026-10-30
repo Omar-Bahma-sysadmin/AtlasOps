@@ -36,7 +36,7 @@ jobs:
       - name: Test existing and missing services
         run: |
           set -euo pipefail
-          ./scripts/health_check.sh
+          bash scripts/health_check.sh
           python3 - <<'PY'
           import json
           from pathlib import Path
@@ -46,7 +46,7 @@ jobs:
           print("PASS: existing ssh service detected as active")
           PY
 
-          ATLASOPS_SERVICE=atlasops-service-that-does-not-exist ./scripts/health_check.sh
+          ATLASOPS_SERVICE=atlasops-service-that-does-not-exist bash scripts/health_check.sh
           python3 - <<'PY'
           import json
           from pathlib import Path
@@ -77,7 +77,7 @@ jobs:
           WORK="$(mktemp -d)"
           mkdir -p "$WORK/source/nested" "$WORK/restore"
           printf 'AtlasOps integration test\n' > "$WORK/source/nested/sample.txt"
-          ./backup.sh "$WORK/source" "$WORK/backups"
+          bash backup.sh "$WORK/source" "$WORK/backups"
           ARCHIVE="$(find "$WORK/backups" -maxdepth 1 -name '*.tar.gz' -print -quit)"
           test -n "$ARCHIVE"
           sha256sum -c "$ARCHIVE.sha256"
@@ -92,18 +92,18 @@ jobs:
           mkdir -p "$WORK/source"
           printf 'data\n' > "$WORK/source/data.txt"
 
-          if ./backup.sh "$WORK/missing-source" "$WORK/backups"; then
+          if bash backup.sh "$WORK/missing-source" "$WORK/backups"; then
             echo "Expected missing source to fail" >&2
             exit 1
           fi
 
-          if ./backup.sh "$WORK/source" "$WORK/source/inside"; then
+          if bash backup.sh "$WORK/source" "$WORK/source/inside"; then
             echo "Expected nested backup destination to fail" >&2
             exit 1
           fi
 
           touch "$WORK/not-a-directory"
-          if ./backup.sh "$WORK/source" "$WORK/not-a-directory/child"; then
+          if bash backup.sh "$WORK/source" "$WORK/not-a-directory/child"; then
             echo "Expected invalid destination to fail" >&2
             exit 1
           fi
@@ -115,7 +115,7 @@ jobs:
           exit 42
           SH
           chmod +x "$WORK/fake-bin/tar"
-          if PATH="$WORK/fake-bin:$PATH" ./backup.sh "$WORK/source" "$WORK/failing-backups"; then
+          if PATH="$WORK/fake-bin:$PATH" bash backup.sh "$WORK/source" "$WORK/failing-backups"; then
             echo "Expected tar failure to propagate" >&2
             exit 1
           fi
