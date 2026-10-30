@@ -119,11 +119,11 @@ jobs:
             echo "Expected tar failure to propagate" >&2
             exit 1
           fi
-          if compgen -G "$WORK/failing-backups/*.sha256" > /dev/null; then
-            echo "Checksum must not be created after tar failure" >&2
+          if find "$WORK/failing-backups" -maxdepth 1 -type f | grep -q .; then
+            echo "No archive, checksum or temporary file should remain after tar failure" >&2
             exit 1
           fi
-          echo "PASS: backup rejects invalid inputs and propagates archive failure"
+          echo "PASS: backup rejects invalid inputs and cleans up after archive failure"
 
           # A checksum failure must not publish an archive or leave temporary files.
           mkdir -p "$WORK/fake-checksum-bin" "$WORK/checksum-failure-backups"
