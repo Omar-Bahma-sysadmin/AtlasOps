@@ -1,0 +1,148 @@
+name: AtlasOps Linux integration tests
+
+on:
+  push:
+    paths:
+      - "scripts/**"
+      - "backup.sh"
+      - "report.py"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+jobs:
+  integration:
+    name: Ubuntu systemd integration
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify Linux and systemd
+        run: |
+          set -euo pipefail
+          test "$(uname -s)" = "Linux"
+          test -d /run/systemd/system
+          systemctl is-system-running || test "$?" -eq 1
+          echo "Linux VM and systemd runtime detected."
+
+      - name: Install and start SSH service
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y openssh-server
+          sudo systemctl enable --now ssh
+          sudo systemctl is-active --quiet ssh
+
+      - name: Test existing and missing services
+        run: |
+          set -euo pipefail
+          ./scripts/health_check.sh
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("reports/latest.json").read_text())
+          assert data["service_check"]["service"] == "ssh", data["service_check"]
+          assert data["service_check"]["status"] == "active", data["service_check"]
+          print("PASS: existing ssh service detected as active")
+          PY
+
+          ATLASOPS_SERVICE=atlasops-service-that-does-not-exist ./scripts/health_check.sh
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("reports/latest.json").read_text())
+          assert data["service_check"]["status"] == "not_found", data["service_check"]
+          print("PASS: missing service detected as not_found")
+          PY
+
+      - name: Test report renderer
+        run: |
+          set -euo pipefail
+          python3 report.py --input reports/latest.json
+          printf '{invalid json' > /tmp/atlasops-invalid.json
+          if python3 report.py --input /tmp/atlasops-invalid.json; then
+            echo "Expected malformed JSON to fail" >&2
+            exit 1
+          fi
+          printf '[]' > /tmp/atlasops-wrong-shape.json
+          if python3 report.py --input /tmp/atlasops-wrong-shape.json; then
+            echo "Expected non-object JSON to fail" >&2
+            exit 1
+          fi
+          echo "PASS: report renderer handles invalid inputs"
+
+      - name: Test backup success, checksum and restore
+        run: |
+          set -euo pipefail
+          WORK="$(mktemp -d)"
+          mkdir -p "$WORK/source/nested" "$WORK/restore"
+          printf 'AtlasOps integration test\n' > "$WORK/source/nested/sample.txt"
+          ./backup.sh "$WORK/source" "$WORK/backups"
+          ARCHIVE="$(find "$WORK/backups" -maxdepth 1 -name '*.tar.gz' -print -quit)"
+          test -n "$ARCHIVE"
+          sha256sum -c "$ARCHIVE.sha256"
+          tar -xzf "$ARCHIVE" -C "$WORK/restore"
+          cmp "$WORK/source/nested/sample.txt" "$WORK/restore/source/nested/sample.txt"
+          echo "PASS: archive, checksum and restore"
+
+      - name: Test backup failure cases
+        run: |
+          set -euo pipefail
+          WORK="$(mktemp -d)"
+          mkdir -p "$WORK/source"
+          printf 'data\n' > "$WORK/source/data.txt"
+
+          if ./backup.sh "$WORK/missing-source" "$WORK/backups"; then
+            echo "Expected missing source to fail" >&2
+            exit 1
+          fi
+
+          if ./backup.sh "$WORK/source" "$WORK/source/inside"; then
+            echo "Expected nested backup destination to fail" >&2
+            exit 1
+          fi
+
+          touch "$WORK/not-a-directory"
+          if ./backup.sh "$WORK/source" "$WORK/not-a-directory/child"; then
+            echo "Expected invalid destination to fail" >&2
+            exit 1
+          fi
+
+          mkdir -p "$WORK/fake-bin" "$WORK/failing-backups"
+          cat > "$WORK/fake-bin/tar" <<'SH'
+          #!/usr/bin/env bash
+          echo "simulated tar failure" >&2
+          exit 42
+          SH
+          chmod +x "$WORK/fake-bin/tar"
+          if PATH="$WORK/fake-bin:$PATH" ./backup.sh "$WORK/source" "$WORK/failing-backups"; then
+            echo "Expected tar failure to propagate" >&2
+            exit 1
+          fi
+          if compgen -G "$WORK/failing-backups/*.sha256" > /dev/null; then
+            echo "Checksum must not be created after tar failure" >&2
+            exit 1
+          fi
+          echo "PASS: backup rejects invalid inputs and propagates archive failure"
+
+      - name: Publish test evidence
+        if: always()
+        run: |
+          {
+            echo "## AtlasOps integration test evidence"
+            echo "- Runner: Ubuntu 24.04 GitHub-hosted VM"
+            echo "- systemd runtime: required by the first test step"
+            echo "- Service checks: ssh active; nonexistent service not_found"
+            echo "- Backup checks: archive, SHA-256, restore, invalid paths, tar failure"
+            echo "- See individual job steps above for actual pass/fail logs."
+          } >> "$GITHUB_STEP_SUMMARY"
+          mkdir -p test-results
+          cp reports/latest.json test-results/latest.json 2>/dev/null || true
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlasops-test-evidence
+          path: test-results/
+          if-no-files-found: ignore
