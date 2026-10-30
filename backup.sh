@@ -9,7 +9,7 @@ if [[ $# -ne 2 ]]; then
   exit 2
 fi
 
-for cmd in realpath tar sha256sum date hostname tr mktemp mv; do
+for cmd in realpath tar sha256sum date hostname tr mktemp ln rm; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
     echo "Fehler: $cmd ist erforderlich." >&2
     exit 1
@@ -53,6 +53,8 @@ fi
 
 ARCHIVE_TMP=""
 CHECKSUM_TMP=""
+ARCHIVE_PUBLISHED=0
+CHECKSUM_PUBLISHED=0
 cleanup() {
   local status=$?
   if [[ -n "$ARCHIVE_TMP" ]]; then
@@ -61,9 +63,14 @@ cleanup() {
   if [[ -n "$CHECKSUM_TMP" ]]; then
     rm -f -- "$CHECKSUM_TMP"
   fi
-  # If either publication step fails, do not leave a partial final backup.
+  # Remove only final files this process successfully published.
   if [[ $status -ne 0 ]]; then
-    rm -f -- "$ARCHIVE" "$CHECKSUM"
+    if [[ "$ARCHIVE_PUBLISHED" -eq 1 ]]; then
+      rm -f -- "$ARCHIVE"
+    fi
+    if [[ "$CHECKSUM_PUBLISHED" -eq 1 ]]; then
+      rm -f -- "$CHECKSUM"
+    fi
   fi
   return "$status"
 }
@@ -77,19 +84,22 @@ tar -czf "$ARCHIVE_TMP" -C "$(dirname "$SOURCE_DIR")" "$(basename "$SOURCE_DIR")
 ARCHIVE_HASH="$(sha256sum "$ARCHIVE_TMP" | awk '{print $1}')"
 printf '%s  %s\n' "$ARCHIVE_HASH" "$ARCHIVE" > "$CHECKSUM_TMP"
 
-# Do not overwrite a file created by another process after the initial collision check.
-mv -n -- "$ARCHIVE_TMP" "$ARCHIVE"
-if [[ -e "$ARCHIVE_TMP" ]]; then
-  echo "Fehler: Backup-Zieldatei wurde zwischenzeitlich angelegt." >&2
+# Hard-link publication is atomic and fails if another process created the target.
+# Temporary files are in the same directory, so they are on the same filesystem.
+if ! ln -- "$ARCHIVE_TMP" "$ARCHIVE"; then
+  echo "Fehler: Backup-Zieldatei existiert bereits oder konnte nicht veröffentlicht werden." >&2
   exit 1
 fi
+ARCHIVE_PUBLISHED=1
+rm -f -- "$ARCHIVE_TMP"
 ARCHIVE_TMP=""
 
-mv -n -- "$CHECKSUM_TMP" "$CHECKSUM"
-if [[ -e "$CHECKSUM_TMP" ]]; then
-  echo "Fehler: Prüfsummendatei wurde zwischenzeitlich angelegt." >&2
+if ! ln -- "$CHECKSUM_TMP" "$CHECKSUM"; then
+  echo "Fehler: Prüfsummendatei existiert bereits oder konnte nicht veröffentlicht werden." >&2
   exit 1
 fi
+CHECKSUM_PUBLISHED=1
+rm -f -- "$CHECKSUM_TMP"
 CHECKSUM_TMP=""
 
 echo "Backup erstellt: $ARCHIVE"
