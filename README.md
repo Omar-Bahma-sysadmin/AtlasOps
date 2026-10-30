@@ -1,4 +1,3 @@
-
 <h1 align="center">AtlasOps</h1>
 
 <h3 align="center">Smart Server Care & Automation</h3>
@@ -22,69 +21,73 @@
 ---
 
 <p align="center">
- <img src="assets/banner.png.jpg" alt="AtlasOps Banner" width="100%">
+  <img src="assets/banner.png.jpg" alt="AtlasOps Banner" width="100%">
 </p>
 
 ---
 
 ## Projektübersicht
 
-AtlasOps ist ein praxisorientiertes Portfolio-Projekt für die Linux-Systemadministration und Automatisierung.
+AtlasOps ist ein praxisorientiertes Portfolio-Projekt im Bereich Linux-Systemadministration und IT-Automatisierung.
 
-Das Toolkit wurde für das Szenario eines fiktiven kleinen Unternehmens mit Linux-Servern konzipiert. Es unterstützt typische administrative Aufgaben und hilft dabei, wiederkehrende Tätigkeiten nachvollziehbar und reproduzierbar auszuführen.
+Das Projekt simuliert typische administrative Aufgaben in einem kleinen Unternehmen mit Linux-Systemen. Ziel ist es, wiederkehrende Aufgaben durch Bash-Skripte zu vereinfachen, Systeminformationen strukturiert zu erfassen und Backups mit SHA-256-Prüfsummen zu erstellen.
 
-**Projektstatus:** Lern- und Lab-Projekt. Die Skripte wurden noch nicht vollständig in einer Linux-Testumgebung geprüft. Nicht ungeprüft auf Produktivsystemen einsetzen.
+**Projektstatus:** Lern- und Lab-Projekt. Die Skripte müssen in einer geeigneten Linux-Testumgebung geprüft werden, bevor sie für produktive Systeme verwendet werden.
 
 ## Funktionen
 
-- Linux-Systeminformationen erfassen
-- Systeminformationen als JSON-Bericht speichern
-- Systemberichte über ein Python-Skript lesbar anzeigen
+- Systeminformationen eines Linux-Systems erfassen
+- Systemzustand in einem JSON-Bericht speichern
+- JSON-Berichte mit Python lesbar ausgeben
 - Verzeichnisse als komprimierte Backups sichern
 - SHA-256-Prüfsummen für Backup-Dateien erstellen
-- Wiederkehrende administrative Aufgaben mit Bash automatisieren
+- Typische administrative Aufgaben mit Bash automatisieren
+- Ergebnisse und Tests strukturiert dokumentieren
 
 ## Technologien
 
-- Linux
-- Bash
-- Python 3
-- Git
-- GitHub
-- Markdown
-
-## Warum dieses Projekt?
-
-Ich habe AtlasOps entwickelt, um meine Kenntnisse in der Linux-Systemadministration und Automatisierung praktisch zu vertiefen.
-
-Dabei beschäftige ich mich mit typischen Aufgaben eines Fachinformatikers für Systemintegration, zum Beispiel dem Erfassen von Systeminformationen, der Erstellung von Berichten und der Automatisierung von Backups.
-
-Mit diesem Projekt möchte ich meine technischen Fähigkeiten weiterentwickeln und mein Verständnis für den Betrieb und die Wartung von IT-Systemen verbessern.
+- **Linux** – Grundlagen der Systemadministration
+- **Bash** – Automatisierung administrativer Aufgaben
+- **Python 3** – Verarbeitung und Darstellung von JSON-Daten
+- **Git & GitHub** – Versionsverwaltung und Projektdokumentation
+- **JSON** – Strukturierte Speicherung von Systeminformationen
+- **SHA-256** – Überprüfung der Integrität von Backup-Dateien
 
 ## Projektstruktur
 
 ```text
 AtlasOps/
 ├── assets/
-│   ├── banner.png
+│   ├── banner.png.jpg
 │   └── screenshots/
+│       ├── 01-health-check.png
+│       ├── 02-json-report.png
+│       ├── 03-backup-restore.png
+│       └── 04-checksum-verification.png
 ├── scripts/
-│   ├── health_check.sh
-│   └── backup.sh
+│   └── health_check.sh
+├── backup.sh
 ├── report.py
 ├── reports/
-└── README.md
+├── README.md
+├── ARCHITECTURE.md
+└── TESTPLAN.md
 ```
 
-## Schnellstart
+## Voraussetzungen
 
-### Voraussetzungen
+Für die Ausführung werden folgende Komponenten benötigt:
 
 - Linux-System oder Ubuntu-VM
 - Bash
 - Python 3
+- Übliche Linux-Werkzeuge wie `tar`, `sha256sum` und `realpath`
 
-### 1. Repository herunterladen
+Die verfügbaren Werkzeuge können je nach Linux-Distribution variieren.
+
+## Installation und Schnellstart
+
+### 1. Repository klonen
 
 ```bash
 git clone https://github.com/Omar-Bahma-sysadmin/AtlasOps.git
@@ -94,7 +97,8 @@ cd AtlasOps
 ### 2. Skripte ausführbar machen
 
 ```bash
-chmod +x scripts/*.sh
+chmod +x scripts/health_check.sh
+chmod +x backup.sh
 ```
 
 ### 3. System-Health-Check ausführen
@@ -103,15 +107,21 @@ chmod +x scripts/*.sh
 ./scripts/health_check.sh
 ```
 
-Der Bericht wird unter `reports/latest.json` gespeichert.
+Das Skript erfasst ausgewählte Systeminformationen und speichert den Bericht unter:
 
-### 4. JSON-Bericht anzeigen
+```text
+reports/latest.json
+```
+
+### 4. Systembericht anzeigen
 
 ```bash
 python3 report.py --input reports/latest.json
 ```
 
-## Backup testen
+Das Python-Skript liest den JSON-Bericht und stellt die enthaltenen Informationen in einer übersichtlichen Textausgabe dar.
+
+## Backup erstellen
 
 Für einen ersten Test können eigene Testdaten erstellt werden:
 
@@ -120,55 +130,111 @@ mkdir -p /tmp/atlasops-demo/source
 echo "Testdaten" > /tmp/atlasops-demo/source/demo.txt
 ```
 
-Backup erstellen:
+Anschließend kann ein Backup erstellt werden:
 
 ```bash
-./scripts/backup.sh /tmp/atlasops-demo/source /tmp/atlasops-demo/backups
+./backup.sh /tmp/atlasops-demo/source /tmp/atlasops-demo/backups
 ```
 
-Das Skript erstellt eine komprimierte Backup-Datei und eine SHA-256-Prüfsummendatei.
+Das Skript erstellt ein komprimiertes Archiv und eine zugehörige SHA-256-Prüfsummendatei.
+
+**Wichtig:** Verwende für Tests ausschließlich eigene Testdaten oder Daten, für deren Sicherung du ausdrücklich berechtigt bist.
+
+## Backup überprüfen
+
+Die Integrität eines erstellten Backups kann mit `sha256sum` überprüft werden.
+
+Wechsle in das Verzeichnis, in dem das Backup gespeichert wurde, und führe den folgenden Befehl mit dem tatsächlichen Namen der Prüfsummendatei aus:
+
+```bash
+sha256sum -c DATEI.tar.gz.sha256
+```
+
+Ersetze `DATEI.tar.gz.sha256` durch den tatsächlichen Dateinamen.
+
+Der Inhalt des Archivs kann außerdem aufgelistet werden:
+
+```bash
+tar -tzf DATEI.tar.gz
+```
+
+Eine Wiederherstellung sollte zunächst in einem separaten Testverzeichnis durchgeführt werden.
 
 ## Sicherheit
 
-- Keine Passwörter, Tokens, privaten Schlüssel oder echten Kundendaten committen.
-- Skripte zuerst in einer virtuellen oder isolierten Testumgebung prüfen.
-- Änderungen an Ansible-Konfigurationen vor der Ausführung mit `--check --diff` testen.
-- Backup-Wiederherstellung, Dateiberechtigungen und Aufbewahrungsfristen vor einem produktiven Einsatz prüfen.
+- Keine Passwörter, Zugriffstokens, privaten Schlüssel oder vertraulichen Kundendaten in das Repository hochladen.
+- Skripte zuerst in einer virtuellen Maschine oder einer isolierten Testumgebung prüfen.
+- Für Backups nur geeignete Quell- und Zielverzeichnisse verwenden.
+- Prüfsummen nicht mit einer vollständigen Wiederherstellung verwechseln: Sie helfen, Veränderungen an Dateien zu erkennen.
+- Die Wiederherstellung von Backups separat testen.
+- Vor einem produktiven Einsatz Dateiberechtigungen, Speicherplatz und Aufbewahrungsfristen berücksichtigen.
 
 ## Screenshots
 
-Illustrative screenshots of the AtlasOps workflow.
+Die folgenden Bilder sind **illustrative Darstellungen des vorgesehenen Workflows**. Sie sind keine bestätigten Ergebnisse eines vollständig durchgeführten Tests auf einem realen Linux-Server.
 
 ### 1. System Health Check
+
 ![AtlasOps Health Check](assets/screenshots/01-health-check.png)
 
 ### 2. JSON System Report
+
 ![AtlasOps JSON Report](assets/screenshots/02-json-report.png)
 
 ### 3. Backup and Restore
+
 ![AtlasOps Backup and Restore](assets/screenshots/03-backup-restore.png)
 
 ### 4. SHA-256 Checksum Verification
+
 ![AtlasOps Checksum Verification](assets/screenshots/04-checksum-verification.png)
+
+## Tests und Qualitätssicherung
+
+Ein separater Testplan befindet sich in [`TESTPLAN.md`](TESTPLAN.md).
+
+Geplante beziehungsweise noch zu dokumentierende Prüfungen umfassen:
+
+- Ausführung des Health-Check-Skripts
+- Überprüfung der erzeugten JSON-Datei
+- Darstellung des Berichts mit Python
+- Erstellung und Integritätsprüfung von Backups
+- Kontrolle des Archivinhalts
+- Testweise Wiederherstellung in einem separaten Verzeichnis
+- Dokumentation von Fehlern, Ursachen und Lösungen
+
+Testergebnisse werden erst nach der tatsächlichen Ausführung in einer geeigneten Testumgebung als abgeschlossen dokumentiert.
 
 ## Roadmap
 
-- [x] Projektstruktur und erste Skriptversionen erstellen
-- [x] Health-Check-Skript implementieren
-- [x] Backup-Skript mit SHA-256-Prüfsumme implementieren
-- [x] JSON-Report-Renderer implementieren
+- [x] Grundstruktur des Projekts erstellen
+- [x] Health-Check-Skript entwickeln
+- [x] Backup-Skript mit SHA-256-Prüfsumme entwickeln
+- [x] Python-Skript zur Darstellung des JSON-Berichts entwickeln
+- [x] Projektdokumentation und illustrative Screenshots hinzufügen
 - [ ] Skripte in einer Ubuntu-Server-VM testen
-- [ ] Backup-Wiederherstellung und Prüfsummenprüfung testen
-- [ ] Ansible-Playbook erstellen und in einer isolierten VM testen
-- [ ] Screenshots und Testergebnisse dokumentieren
+- [ ] Backup-Integrität und Wiederherstellung praktisch prüfen
+- [ ] Testergebnisse dokumentieren
+- [ ] Ansible-Playbook als zukünftige Erweiterung entwickeln und testen
 - [ ] Deutsche Projektpräsentation für Bewerbungen vorbereiten
+
+## Lernziele
+
+Mit AtlasOps vertiefe ich meine Kenntnisse in folgenden Bereichen:
+
+- Linux-Systemadministration
+- Bash-Scripting und Automatisierung
+- Python und JSON
+- Backup- und Datenintegritätskonzepte
+- Fehleranalyse und systematisches Troubleshooting
+- Git, GitHub und technische Dokumentation
+
+## Über das Projekt
+
+AtlasOps ist ein persönliches Lernprojekt, mit dem ich meine praktischen IT-Kenntnisse erweitere und mich auf Aufgaben im Bereich **Fachinformatik für Systemintegration** vorbereite.
+
+Ich möchte damit zeigen, dass ich mich eigenständig mit technischen Problemen auseinandersetze, Lösungen dokumentiere und meine Kenntnisse in der Systemadministration kontinuierlich weiterentwickle.
 
 ---
 
-<p align="center">
-  <strong>AtlasOps – Learning by Building.</strong>
-</p>
-
-<p align="center">
-  Portfolio-Projekt von Omar Bahma
-</p>
+**Repository:** [Omar-Bahma-sysadmin/AtlasOps](https://github.com/Omar-Bahma-sysadmin/AtlasOps)
